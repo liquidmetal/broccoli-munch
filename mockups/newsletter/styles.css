@@ -1,0 +1,28 @@
+body {
+    font-family: "HelveticaNeue-UltraLight", "Segoe UI", "Roboto Light", sans-serif;
+}
+img {
+    vertical-align:middle;
+}
+p {
+    vertical-align:center;
+}
+td {
+    width: 100%;
+}
+.article-card {
+    margin-bottom:10px;
+}
+.article-card td {
+    border-top: solid 1px #dfdfdf;
+    border-left: solid 1px #dfdfdf;
+    border-bottom: solid 1px #dfdfdf;
+    border-right: solid 1px #dfdfdf;
+    background-color: #fefefe;
+    padding: 15px;
+    width: 100%;
+}
+
+.article-card td h2 {
+    margin: 0;
+}
