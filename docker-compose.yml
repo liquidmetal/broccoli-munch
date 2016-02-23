@@ -1,4 +1,15 @@
+rabbit:
+    image: rabbitmq:3.6.0
+redis:
+    image: redis:3.0.7
 crawler1:
     image: munch-crawler
-    command: /work/broccoli-munch/bin/crawler
-
+    command: crawler
+        - rabbit
+        - redis
+director:
+    image: munch-director
+    command: director
+    links:
+        - rabbit
+        - redis
