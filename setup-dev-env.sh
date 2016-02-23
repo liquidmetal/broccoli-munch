@@ -1,7 +1,8 @@
 #!/bin/bash
 
 export GOPATH=`pwd`
-export PATH=`pwd`/bin:$PATH
+export PATH=`pwd`/bin:/usr/local/go/bin/:$PATH
+export GOROOT=/usr/local/go/
 
 
 ###############
