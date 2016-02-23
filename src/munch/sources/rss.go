@@ -5,8 +5,20 @@ import (
 	"fmt"
 	"github.com/advancedlogic/GoOse"
 	"io/ioutil"
+	"munch/stories"
 	"net/http"
+	"time"
 )
+
+type tempArticle struct {
+	url         string
+	content     string
+	description string
+	title       string
+	keywords    string
+	image       string
+	pubdate     int64
+}
 
 func NewSourceRss(name string, url string, lastcrawled int) *SourceRss {
 	ret := new(SourceRss)
@@ -51,40 +63,60 @@ func (rss *SourceRss) fetchFeed() {
 // of the last crawl
 func (rss *SourceRss) removeOldItems() {
 	fmt.Printf("%s\n", rss.data.Title)
-	for i, _ := range rss.data.ItemList {
+	/*for i, _ := range rss.data.ItemList {
 		// TODO remove old items
-		fmt.Printf("%s %s\n", rss.data.ItemList[i].Link, rss.data.ItemList[i].PubDate)
-	}
+	}*/
 }
 
-func (rss *SourceRss) fetchFullArticles() []string {
-	ret := make([]string, 10, 10)
+func (rss *SourceRss) fetchFullArticles() []tempArticle {
+	var ret []tempArticle
+	g := goose.New()
 	for i, _ := range rss.data.ItemList {
 		item := rss.data.ItemList[i]
-		//response, err := http.Get(item.Link)
-		//if err != nil {
-		//		fmt.Printf("There was an error when fetching the article: %s\n", item.Link)
-		//}
-		//contents, err := ioutil.ReadAll(response.Body)
+		article, err := g.ExtractFromURL(item.Link)
+		if err != nil {
+			fmt.Printf("There was an error fetching the article for: %s\n", item.Link)
+			continue
+		}
 
-		g := goose.New()
-		article, _ := g.ExtractFromURL(item.Link)
-		fmt.Printf("%s: %s\n%s\n=======================================================\n",
-			item.Title,
-			article.FinalURL,
-			string(article.MetaDescription))
+		t := new(tempArticle)
+		t.url = article.FinalURL
+		t.content = article.CleanedText
+		t.description = article.MetaDescription
+		t.keywords = article.MetaKeywords
+		t.image = article.TopImage
+		t.title = item.Title
+		parsed_time, err := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", item.PubDate)
+		if err != nil {
+			fmt.Printf("There was an error when trying to figure out the date\n")
+			fmt.Printf("%s\n", err)
+			continue
+		}
+		t.pubdate = parsed_time.Unix()
+		ret = append(ret, *t)
 	}
 	return ret
 }
 
-func (rss *SourceRss) FetchNewData() {
+func (rss *SourceRss) constructStories(articles []tempArticle) []stories.Story {
+	var ret []stories.Story
+
+	for i, _ := range articles {
+		article := articles[i]
+		story := stories.NewStory(article.title, article.content, article.url, article.pubdate)
+		ret = append(ret, *story)
+	}
+	return ret
+}
+
+func (rss *SourceRss) FetchNewData() []tempArticle {
 	rss.fetchFeed()
 	rss.removeOldItems()
-	rss.fetchFullArticles()
+	articles := rss.fetchFullArticles()
+	return articles
 }
 
-func (rss *SourceRss) GenerateStories() {
-}
-
-func (rss *SourceRss) PersistStories() {
+func (rss *SourceRss) GenerateStories(articles []tempArticle) []stories.Story {
+	stories := rss.constructStories(articles)
+	return stories
 }
