@@ -1,0 +1,4 @@
+crawler1:
+    image: munch-crawler
+    command: /work/broccoli-munch/bin/crawler
+
