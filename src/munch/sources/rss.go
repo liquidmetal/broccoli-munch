@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"munch/stories"
 	"net/http"
-	"time"
 )
 
 type tempArticle struct {
@@ -45,8 +44,8 @@ func (rss *SourceRss) fetchFeed() {
 	}
 
 	mtime := response.Header.Get("Last-Modified")
-	parsed_time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
-	rss.lastCrawled = parsed_time.Unix()
+	parsed_time, err := parse_time(mtime)
+	rss.lastCrawled = parsed_time
 
 	defer response.Body.Close()
 	contents, err := ioutil.ReadAll(response.Body)
@@ -91,13 +90,13 @@ func (rss *SourceRss) fetchFullArticles() []tempArticle {
 		t.keywords = article.MetaKeywords
 		t.image = article.TopImage
 		t.title = item.Title
-		parsed_time, err := time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", item.PubDate)
+		parsed_time, err := parse_time(item.PubDate)
 		if err != nil {
 			fmt.Printf("There was an error when trying to figure out the date\n")
 			fmt.Printf("%s\n", err)
 			continue
 		}
-		t.pubdate = parsed_time.Unix()
+		t.pubdate = parsed_time
 		ret = append(ret, *t)
 	}
 	return ret
@@ -108,7 +107,7 @@ func (rss *SourceRss) constructStories(articles []tempArticle) []stories.Story {
 
 	for i, _ := range articles {
 		article := articles[i]
-		story := stories.NewStory(article.title, article.content, article.url, article.pubdate, rss.id)
+		story := stories.New(article.title, article.content, article.url, article.pubdate, rss.id)
 		ret = append(ret, *story)
 	}
 	return ret
@@ -121,14 +120,23 @@ func (rss *SourceRss) hasNewStories() (has bool) {
 		fmt.Printf("Assuming new stories were available\n")
 		return true
 	}
-	mtime := response.Header.Get("Last-Modified")
-	parsed_time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
 
-	fmt.Printf("Last crawled = %d\n", rss.lastCrawled)
-	fmt.Printf("Updated = %d\n", parsed_time.Unix())
+	// Try and figure out the mtime
+	mtime := response.Header.Get("Last-Modified")
+	var parsed_time int64
+	if len(mtime) > 0 {
+		parsed_time, err = parse_time(mtime)
+		if err != nil {
+			fmt.Printf("There was an error parsing the timestamp: %s\n", mtime)
+		}
+		fmt.Printf("Last crawled = %d\n", rss.lastCrawled)
+		fmt.Printf("Updated = %d (%s)\n", parsed_time, mtime)
+	} else {
+		fmt.Printf("There was omething wrong with Last-Modified")
+	}
 
 	// If there are changes, yes
-	if rss.lastCrawled < parsed_time.Unix() {
+	if rss.lastCrawled < parsed_time {
 		return true
 	}
 	return false

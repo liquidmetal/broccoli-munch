@@ -1,7 +1,12 @@
 // The sources package
 package sources
 
-import "munch/stories"
+import (
+	"errors"
+	"fmt"
+	"munch/stories"
+	"time"
+)
 
 const (
 	TypeRss    = iota
@@ -30,4 +35,35 @@ type SourceRss struct {
 	Source
 	url  string
 	data Rss2
+}
+
+// Utility function for parsing any kind of time
+// TODO properly arrange these based on the kind of traffic
+func parse_time(mtime string) (int64, error) {
+	temp, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
+	if err == nil {
+		fmt.Printf("Parsed into: %d\n", temp.Unix())
+		return temp.Unix(), nil
+	}
+
+	temp, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", mtime)
+	if err == nil {
+		fmt.Printf("Parsed into: %d\n", temp.Unix())
+		return temp.Unix(), nil
+	}
+
+	temp, err = time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", mtime)
+	if err == nil {
+		fmt.Printf("Parsed into: %d\n", temp.Unix())
+		return temp.Unix(), nil
+	}
+
+	temp, err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", mtime)
+	if err == nil {
+		fmt.Printf("Parsed into: %d\n", temp.Unix())
+		return temp.Unix(), nil
+	}
+
+	fmt.Printf("There was an error parsing: %s\n", mtime)
+	return -1, errors.New("There was an error parsing the timestamp")
 }

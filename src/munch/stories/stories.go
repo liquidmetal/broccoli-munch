@@ -13,7 +13,7 @@ type Story struct {
 	SourceId int
 }
 
-func NewStory(title string, content string, link string, pubdate int64, src int) *Story {
+func New(title string, content string, link string, pubdate int64, src int) *Story {
 	story := new(Story)
 	story.Title = title
 	story.Content = content
@@ -38,4 +38,6 @@ func (story *Story) Summarize(sentences int) string {
 	return result
 }
 
+func (story *Story) GetSourceId() int {
+	return story.SourceId
 }

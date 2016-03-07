@@ -40,3 +40,24 @@ func (db *Db) PersistStory(story *stories.Story) {
 		return
 	}
 }
+
+func (db *Db) FetchStoriesSince(timestamp int64) []*stories.Story {
+	result, err := db.connection.Query("SELECT id, url, title, content, pubdate, source_id FROM broccoli_stories WHERE pubdate >= ?", timestamp)
+
+	if err != nil {
+		fmt.Printf("There was an error when fetching stories since: %s\n", err)
+	}
+
+	ret := make([]*stories.Story, 0, 10)
+	for result.Next() {
+		var id int
+		var url string
+		var title string
+		var content string
+		var pubdate int64
+		var source_id int
+		result.Scan(&id, &url, &title, &content, &pubdate, &source_id)
+		ret = append(ret, stories.New(title, content, url, pubdate, source_id))
+	}
+	return ret
+}
