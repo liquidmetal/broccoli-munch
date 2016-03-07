@@ -1,10 +1,13 @@
-all: fetch compile_crawler compile_director
+all: fetch compile_crawler compile_emailer compile_director 
 
 compile_crawler: src/crawler/crawler.go
 	go install crawler
 
 compile_director: src/director/director.go
 	go install director
+
+compile_emailer: src/emailer/emailer.go
+	go install emailer
 
 fetch:
 	go get github.com/advancedlogic/GoOse
