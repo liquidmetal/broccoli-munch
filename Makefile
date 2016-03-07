@@ -1,8 +1,15 @@
-all:
+all: fetch compile_crawler compile_director
+
+compile_crawler: src/crawler/crawler.go
+	go install crawler
+
+compile_director: src/director/director.go
+	go install director
+
+fetch:
 	go get github.com/advancedlogic/GoOse
 	go get github.com/mattn/go-sqlite3
-	go install crawler
-	go install director
+	go get github.com/michaelklishin/rabbit-hole
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .
@@ -10,3 +17,6 @@ build:
 
 run:
 	docker-compose up
+
+db:
+	sqlite3 broccoli.db < src/munch/database/schema.sql

@@ -4,15 +4,15 @@ import "fmt"
 
 type Story struct {
 	Title   string
-	Summary string
+	Content string
 	Link    string
 	PubDate int64
 }
 
-func NewStory(title string, summary string, link string, pubdate int64) *Story {
+func NewStory(title string, content string, link string, pubdate int64) *Story {
 	story := new(Story)
 	story.Title = title
-	story.Summary = summary
+	story.Content = content
 	story.Link = link
 	story.PubDate = pubdate
 
@@ -20,5 +20,5 @@ func NewStory(title string, summary string, link string, pubdate int64) *Story {
 }
 
 func (story *Story) PrintStory() {
-	fmt.Printf("%s\n=========================\n%s\n%s\n", story.Title, story.Summary, story.Link)
+	fmt.Printf("%s\n=========================\n%s\n%s\n", story.Title, story.Content, story.Link)
 }

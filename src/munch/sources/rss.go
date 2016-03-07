@@ -20,8 +20,9 @@ type tempArticle struct {
 	pubdate     int64
 }
 
-func NewSourceRss(name string, url string, lastcrawled int) *SourceRss {
+func NewSourceRss(id int, name string, url string, lastcrawled int64) *SourceRss {
 	ret := new(SourceRss)
+	ret.id = id
 	ret.name = name
 	ret.url = FixRssUrl(url)
 	ret.lastCrawled = lastcrawled
@@ -36,6 +37,8 @@ func FixRssUrl(url string) string {
 }
 
 func (rss *SourceRss) fetchFeed() {
+	// TODO verify if there indeed exists new content using etags
+
 	response, err := http.Get(rss.url)
 	if err != nil {
 		fmt.Printf("There was an error when fetching %s\n", rss.url)
@@ -109,7 +112,22 @@ func (rss *SourceRss) constructStories(articles []tempArticle) []stories.Story {
 	return ret
 }
 
+func (rss *SourceRss) hasNewStories() (has bool) {
+	response, err := http.Head(rss.url)
+	if err != nil {
+		fmt.Printf("There was an error running the HEAD command on url:\n%s", rss.url)
+		fmt.Printf("Assuming new stories were available\n")
+		return true
+	}
+	mtime := response.Header.Get("Last-Modified")
+	parsed_time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
+	fmt.Printf("Parsed time = %d\n", parsed_time.Unix())
+	rss.lastCrawled = parsed_time.Unix()
+	return true
+}
+
 func (rss *SourceRss) FetchNewData() []tempArticle {
+	rss.hasNewStories()
 	rss.fetchFeed()
 	rss.removeOldItems()
 	articles := rss.fetchFullArticles()
@@ -119,4 +137,24 @@ func (rss *SourceRss) FetchNewData() []tempArticle {
 func (rss *SourceRss) GenerateStories(articles []tempArticle) []stories.Story {
 	stories := rss.constructStories(articles)
 	return stories
+}
+
+func (rss *SourceRss) GetId() int {
+	return rss.id
+}
+
+func (rss *SourceRss) GetName() string {
+	return rss.name
+}
+
+func (rss *SourceRss) GetUrl() string {
+	return rss.url
+}
+
+func (rss *SourceRss) GetType() int {
+	return TypeRss
+}
+
+func (rss *SourceRss) GetLastCrawled() int64 {
+	return rss.lastCrawled
 }
