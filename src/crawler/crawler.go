@@ -35,20 +35,23 @@ func main() {
 	//f := sources.NewSourceRss("Techcrunch", "http://feeds.feedburner.com/TechCrunch/?fmt=xml", 0)
 	//f := sources.NewSourceRss("Utkarsh Sinha", "http://utkarshsinha.com/index.xml", 0)
 	articles := source.FetchNewData()
-	s := source.GenerateStories(articles)
-	s[0].PrintStory()
 
-	persistStories(s, db)
-
+	if articles != nil {
+		s := source.GenerateStories(articles)
+		persistStories(s, db)
+	}
 	db.PersistSource(source)
 	db.Close()
 }
 
 func persistStories(stories []stories.Story, db *database.Db) {
+	count := 0
 	for _, story := range stories {
 		// If the story doesn't already exist, persist it
 		if !db.StoryExists(&story) {
 			db.PersistStory(&story)
+			count += 1
 		}
 	}
+	fmt.Printf("Saved %d new stories\n", count)
 }

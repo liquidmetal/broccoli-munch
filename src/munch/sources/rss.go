@@ -37,14 +37,16 @@ func FixRssUrl(url string) string {
 }
 
 func (rss *SourceRss) fetchFeed() {
-	// TODO verify if there indeed exists new content using etags
-
 	response, err := http.Get(rss.url)
 	if err != nil {
 		fmt.Printf("There was an error when fetching %s\n", rss.url)
 		fmt.Printf("%s\n", err)
 		return
 	}
+
+	mtime := response.Header.Get("Last-Modified")
+	parsed_time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
+	rss.lastCrawled = parsed_time.Unix()
 
 	defer response.Body.Close()
 	contents, err := ioutil.ReadAll(response.Body)
@@ -106,7 +108,7 @@ func (rss *SourceRss) constructStories(articles []tempArticle) []stories.Story {
 
 	for i, _ := range articles {
 		article := articles[i]
-		story := stories.NewStory(article.title, article.content, article.url, article.pubdate)
+		story := stories.NewStory(article.title, article.content, article.url, article.pubdate, rss.id)
 		ret = append(ret, *story)
 	}
 	return ret
@@ -121,17 +123,28 @@ func (rss *SourceRss) hasNewStories() (has bool) {
 	}
 	mtime := response.Header.Get("Last-Modified")
 	parsed_time, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
-	fmt.Printf("Parsed time = %d\n", parsed_time.Unix())
-	rss.lastCrawled = parsed_time.Unix()
-	return true
+
+	fmt.Printf("Last crawled = %d\n", rss.lastCrawled)
+	fmt.Printf("Updated = %d\n", parsed_time.Unix())
+
+	// If there are changes, yes
+	if rss.lastCrawled < parsed_time.Unix() {
+		return true
+	}
+	return false
 }
 
 func (rss *SourceRss) FetchNewData() []tempArticle {
-	rss.hasNewStories()
-	rss.fetchFeed()
-	rss.removeOldItems()
-	articles := rss.fetchFullArticles()
-	return articles
+	has_new := rss.hasNewStories()
+
+	if has_new {
+		rss.fetchFeed()
+		rss.removeOldItems()
+		articles := rss.fetchFullArticles()
+		return articles
+	}
+
+	return nil
 }
 
 func (rss *SourceRss) GenerateStories(articles []tempArticle) []stories.Story {
