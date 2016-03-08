@@ -14,6 +14,8 @@ fetch:
 	go get github.com/mattn/go-sqlite3
 	go get github.com/michaelklishin/rabbit-hole
 	go get github.com/JesusIslam/tldr
+	go get github.com/dchest/htmlmin 
+	go get github.com/mailgun/mailgun-go
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .

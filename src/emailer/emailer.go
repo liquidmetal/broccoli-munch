@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/mailgun/mailgun-go"
 	"munch/database"
 	"munch/producer"
 )
