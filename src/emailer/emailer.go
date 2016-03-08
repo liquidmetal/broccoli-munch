@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"munch/database"
+	"munch/producer"
 )
 
 func main() {
@@ -19,7 +20,11 @@ func main() {
 	for _, s := range interesting_stories {
 		s.PrintStory()
 	}
-	nl.MarkPublished()
+	//nl.MarkPublished()
 	db.PersistNewsletter(nl)
+
+	html := producer.Produce(nl, interesting_stories)
+	fmt.Printf("Email HTML:\n%s\n", html)
+
 	db.Close()
 }

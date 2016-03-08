@@ -12,6 +12,7 @@ type Newsletter struct {
 	PubDate             int64
 	sources             []*sources.SourceManipulator
 	sources_lastchecked []int64
+	sources_newchecked  []int64
 }
 
 func New(id int, title string, pubdate int64) *Newsletter {
@@ -20,6 +21,11 @@ func New(id int, title string, pubdate int64) *Newsletter {
 	ret.id = id
 	ret.Title = title
 	ret.PubDate = pubdate
+
+	// Used only when sifting through new stories. The idea is to store which source
+	// has been checked until which time and then push that to the database once the
+	// "publish" method is called.
+	ret.sources_newchecked = nil
 
 	return ret
 }
@@ -51,8 +57,10 @@ func (newsletter *Newsletter) GetInterestingStories(all_stories []*stories.Story
 
 	// Fetchall stories after the published source (for every source)
 	ret := make([]*stories.Story, 0, 5)
+	newsletter.sources_newchecked = make([]int64, len(newsletter.sources_lastchecked))
+	copy(newsletter.sources_newchecked, newsletter.sources_lastchecked)
 	for j, src := range newsletter.sources {
-		var latest_pubdate int64 = newsletter.sources_lastchecked[j]
+		var latest_pubdate int64 = newsletter.sources_newchecked[j]
 		for _, story := range all_stories {
 			if story.GetPubDate() > newsletter.sources_lastchecked[j] &&
 				story.GetSourceId() == (*src).GetId() {
@@ -63,7 +71,7 @@ func (newsletter *Newsletter) GetInterestingStories(all_stories []*stories.Story
 				}
 			}
 		}
-		newsletter.sources_lastchecked[j] = latest_pubdate
+		newsletter.sources_newchecked[j] = latest_pubdate
 	}
 	return ret
 }
@@ -78,6 +86,10 @@ func (newsletter *Newsletter) MarkPublished() {
 		}
 	}
 	newsletter.PubDate = max_pubdate
+
+	if newsletter.sources_newchecked != nil {
+		copy(newsletter.sources_lastchecked, newsletter.sources_newchecked)
+	}
 }
 
 func (newsletter *Newsletter) GetId() int {
