@@ -13,6 +13,7 @@ fetch:
 	go get github.com/advancedlogic/GoOse
 	go get github.com/mattn/go-sqlite3
 	go get github.com/michaelklishin/rabbit-hole
+	go get github.com/JesusIslam/tldr
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .

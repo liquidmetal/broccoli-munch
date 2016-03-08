@@ -38,6 +38,22 @@ func (story *Story) Summarize(sentences int) string {
 	return result
 }
 
+func (story *Story) GetTitle() string {
+	return story.Title
+}
+
+func (story *Story) GetContent() string {
+	return story.Content
+}
+
+func (story *Story) GetLink() string {
+	return story.Link
+}
+
+func (story *Story) GetPubDate() int64 {
+	return story.PubDate
+}
+
 func (story *Story) GetSourceId() int {
 	return story.SourceId
 }

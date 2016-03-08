@@ -42,7 +42,7 @@ func (db *Db) PersistStory(story *stories.Story) {
 }
 
 func (db *Db) FetchStoriesSince(timestamp int64) []*stories.Story {
-	result, err := db.connection.Query("SELECT id, url, title, content, pubdate, source_id FROM broccoli_stories WHERE pubdate >= ?", timestamp)
+	result, err := db.connection.Query("SELECT id, url, title, content, pubdate, source_id FROM broccoli_stories WHERE pubdate > ?", timestamp)
 
 	if err != nil {
 		fmt.Printf("There was an error when fetching stories since: %s\n", err)
