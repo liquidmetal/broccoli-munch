@@ -16,6 +16,7 @@ fetch:
 	go get github.com/JesusIslam/tldr
 	go get github.com/dchest/htmlmin 
 	go get github.com/mailgun/mailgun-go
+	go get github.com/go-yaml/yaml
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .
