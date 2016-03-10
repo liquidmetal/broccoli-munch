@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/go-yaml/yaml"
 	"io/ioutil"
-	"strconv"
 )
 
 type ConfigReader struct {
 	Mail   map[string]string
 	Db     map[string]string
 	Webapp map[string]string
+	Queues map[string]string
 }
 
 type Config struct {
@@ -26,6 +26,13 @@ type Config struct {
 
 	webapp struct {
 		port int
+	}
+
+	queues struct {
+		host     string
+		port     int
+		username string
+		password string
 	}
 }
 
@@ -61,36 +68,24 @@ func (config *Config) readConfig() error {
 }
 
 func (config *Config) parseConfigValues(t *ConfigReader) error {
-	// Mail settings
-	config.mail.publickey = t.Mail["publickey"]
-	config.mail.privatekey = t.Mail["privatekey"]
+	config.parseConfigMailValues(t)
 
 	// Database settings
 	config.db.filename = t.Db["filename"]
 
-	// Webapp settings
-	pnum, err := strconv.Atoi(t.Webapp["port"])
+	err := config.parseConfigWebappValues(t)
 	if err != nil {
-		fmt.Errorf("There was an error parsing the webapp port number\n")
-		return err
+		panic(err)
 	}
-	config.webapp.port = pnum
+
+	err = config.parseConfigQueueValues(t)
+	if err != nil {
+		panic(err)
+	}
 
 	return nil
 }
 
-func (config *Config) GetMailPublicKey() string {
-	return config.mail.publickey
-}
-
-func (config *Config) GetMailPrivateKey() string {
-	return config.mail.privatekey
-}
-
 func (config *Config) GetDbFilename() string {
 	return config.db.filename
-}
-
-func (config *Config) GetWebappPort() int {
-	return config.webapp.port
 }

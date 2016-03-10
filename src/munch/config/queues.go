@@ -19,3 +19,19 @@ func (config *Config) parseConfigQueueValues(t *ConfigReader) error {
 	config.queues.password = t.Queues["password"]
 	return nil
 }
+
+func (config *Config) GetQueueHost() string {
+	return config.queues.host
+}
+
+func (config *Config) GetQueuePort() int {
+	return config.queues.port
+}
+
+func (config *Config) GetQueueUsername() string {
+	return config.queues.username
+}
+
+func (config *Config) GetQueuePassword() string {
+	return config.queues.password
+}

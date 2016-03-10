@@ -15,7 +15,7 @@ compile_webapp: src/webapp/webapp.go
 fetch:
 	go get github.com/advancedlogic/GoOse
 	go get github.com/mattn/go-sqlite3
-	go get github.com/michaelklishin/rabbit-hole
+	go get github.com/streadway/amqp
 	go get github.com/JesusIslam/tldr
 	go get github.com/dchest/htmlmin 
 	go get github.com/mailgun/mailgun-go
