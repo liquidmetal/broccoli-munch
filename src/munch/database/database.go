@@ -17,9 +17,9 @@ type Db struct {
 
 ///////////////////////////////////////////////////////////////
 // Database housekeeping
-func NewDB() *Db {
+func New(filename string) *Db {
 	db := new(Db)
-	connection, err := sql.Open("sqlite3", "./broccoli.db")
+	connection, err := sql.Open("sqlite3", filename)
 
 	if err != nil {
 		fmt.Printf("There was an error opening the database\n")

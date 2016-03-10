@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"munch/config"
 	"munch/database"
 	"munch/stories"
 	"os"
@@ -22,13 +23,14 @@ func main() {
 		return
 	}
 
+	cfg := config.New()
 	sourceid, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		fmt.Printf("There was an error converting source ID to integer (%s)\n", sourceid)
 		return
 	}
 
-	db := database.NewDB()
+	db := database.New(cfg.GetDbFilename())
 	fmt.Printf("Fetching techcrunch...\n")
 	source := db.FetchSource(sourceid)
 

@@ -11,7 +11,8 @@ import (
 func main() {
 	fmt.Printf("This is the emailer\n")
 
-	db := database.NewDB()
+	cfg := config.New()
+	db := database.New(cfg.GetDbFilename())
 	nl := db.FetchNewsletter(1)
 	db.FetchNewsletterSources(nl)
 	nl.PrintNewsletter()
