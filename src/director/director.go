@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"munch/config"
+	"munch/messaging"
+)
 
 func main() {
+
+	cfg := config.New()
+	messaging.New(cfg)
+
 	fmt.Printf("This is the munch director. The one who orchestrates everything.\n")
 }
