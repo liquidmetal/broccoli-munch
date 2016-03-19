@@ -30,9 +30,9 @@ func main() {
 		return
 	}
 
-	db := database.New(cfg.GetDbFilename())
-	fmt.Printf("Fetching techcrunch...\n")
+	db := database.New(cfg)
 	source := db.FetchSource(sourceid)
+	fmt.Printf("Fetching %s...\n", source.GetName())
 
 	//f := sources.NewSourceRss("Techcrunch", "http://feeds.feedburner.com/TechCrunch/?fmt=xml", 0)
 	//f := sources.NewSourceRss("Utkarsh Sinha", "http://utkarshsinha.com/index.xml", 0)

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
+	"munch/config"
 )
 
 const (
@@ -13,13 +14,15 @@ const (
 
 type Db struct {
 	connection *sql.DB
+	cfg        *config.Config
 }
 
 ///////////////////////////////////////////////////////////////
 // Database housekeeping
-func New(filename string) *Db {
+func New(cfg *config.Config) *Db {
 	db := new(Db)
-	connection, err := sql.Open("sqlite3", filename)
+	db.cfg = cfg
+	connection, err := sql.Open("sqlite3", cfg.GetDbFilename())
 
 	if err != nil {
 		fmt.Printf("There was an error opening the database\n")

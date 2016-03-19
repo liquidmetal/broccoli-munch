@@ -12,7 +12,7 @@ func main() {
 	fmt.Printf("This is the emailer\n")
 
 	cfg := config.New()
-	db := database.New(cfg.GetDbFilename())
+	db := database.New(cfg)
 	nl := db.FetchNewsletter(1)
 	db.FetchNewsletterSources(nl)
 	nl.PrintNewsletter()
