@@ -11,8 +11,8 @@ import (
 	"hash/fnv"
 	"munch/config"
 	"munch/stories"
+	"net"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"os/exec"
@@ -153,7 +153,7 @@ func newOAuthClient(ctx context.Context, config *oauth2.Config, cfg *config.Conf
 	token, err := tokenFromFile(cacheFile)
 	fmt.Printf("Error while fetching token = %s\n", err)
 	if err != nil {
-		token = tokenFromWeb(ctx, config)
+		token = tokenFromWeb(ctx, config, cfg)
 		token.RefreshToken = cfg.GetYoutubeRefreshToken()
 		saveToken(cacheFile, token)
 	} else {
@@ -172,10 +172,19 @@ func tokenCacheFile(config *oauth2.Config) string {
 	return filepath.Join(osUserCacheDir(), url.QueryEscape(fn))
 }
 
-func tokenFromWeb(ctx context.Context, config *oauth2.Config) *oauth2.Token {
+func tokenFromWeb(ctx context.Context, config *oauth2.Config, cfg *config.Config) *oauth2.Token {
 	ch := make(chan string)
 	randState := fmt.Sprintf("st%d", time.Now().UnixNano())
-	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GetYoutubeOAuthPort()))
+	if err != nil {
+		panic(err)
+	}
+	// make our own handler that puts all requests in a wait group.
+	h := http.NewServeMux()
+
+	// add a close handlefunc to that handler
+	h.HandleFunc("/youtube_callback/", func(rw http.ResponseWriter, req *http.Request) {
 		if req.URL.Path == "/favicon.ico" {
 			http.Error(rw, "", 404)
 			return
@@ -189,20 +198,23 @@ func tokenFromWeb(ctx context.Context, config *oauth2.Config) *oauth2.Token {
 			fmt.Fprintf(rw, "<h1>Success</h1>Authorized.")
 			rw.(http.Flusher).Flush()
 			ch <- code
+			lis.Close()
 			return
 		}
 		fmt.Printf("no code")
 		http.Error(rw, "", 500)
-	}))
-	defer ts.Close()
+		lis.Close()
+	})
 
-	fmt.Printf("HTTP Server = %s\n", ts.URL)
-	config.RedirectURL = ts.URL
+	//listen and serve until listner is closed
+	go http.Serve(lis, h)
+
+	// TODO fix this hard-coded localhost thingy
+	config.RedirectURL = fmt.Sprintf("http://127.0.0.1:%d/youtube_callback/", cfg.GetYoutubeOAuthPort())
 	authURL := config.AuthCodeURL(randState)
 	go openURL(authURL)
 	fmt.Printf("Authorize this app at: %s", authURL)
 	code := <-ch
-	fmt.Printf("Got code: %s", code)
 
 	token, err := config.Exchange(ctx, code)
 	if err != nil {

@@ -15,6 +15,9 @@ type ConfigReader struct {
 	Queues  map[string]string
 }
 
+// Step 1: To add a new setting, add an entry here
+// Step 2: Add a corresponding config*ParseValue function
+// Step 3: Add a corresponding Get function - since these are all hidden
 type Config struct {
 	mail struct {
 		publickey  string
