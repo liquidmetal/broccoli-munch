@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	//mq := connect()
+	//declareQueues(mq)
 
 	cfg := config.New()
 	messaging.New(cfg)

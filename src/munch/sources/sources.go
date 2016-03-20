@@ -74,11 +74,11 @@ func parse_time(mtime string) (int64, error) {
 		return temp.Unix(), nil
 	}
 
-    temp, err = time.Parse("2006-01-02T15:04:05.000Z", mtime)
-    if err == nil {
-        fmt.Printf("Parsed into: %d\n", temp.Unix())
-        return temp.Unix(), nil
-    }
+	temp, err = time.Parse("2006-01-02T15:04:05.000Z", mtime)
+	if err == nil {
+		fmt.Printf("Parsed into: %d\n", temp.Unix())
+		return temp.Unix(), nil
+	}
 
 	fmt.Printf("There was an error parsing: %s\n", mtime)
 	return -1, errors.New("There was an error parsing the timestamp")
