@@ -29,6 +29,7 @@ type Config struct {
 		clientsecret string
 		refresh      string
 		oauthport    int
+		maxresults   int64
 	}
 
 	db struct {

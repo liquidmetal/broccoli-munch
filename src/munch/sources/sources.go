@@ -52,31 +52,26 @@ type tempArticle struct {
 func parse_time(mtime string) (int64, error) {
 	temp, err := time.Parse("Mon, 02 Jan 2006 15:04:05 MST", mtime)
 	if err == nil {
-		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
 
 	temp, err = time.Parse("Mon, 2 Jan 2006 15:04:05 MST", mtime)
 	if err == nil {
-		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
 
 	temp, err = time.Parse("Mon, 02 Jan 2006 15:04:05 -0700", mtime)
 	if err == nil {
-		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
 
 	temp, err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", mtime)
 	if err == nil {
-		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
 
 	temp, err = time.Parse("2006-01-02T15:04:05.000Z", mtime)
 	if err == nil {
-		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
 

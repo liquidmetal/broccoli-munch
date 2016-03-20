@@ -15,6 +15,13 @@ func (config *Config) parseConfigYoutubeValues(t *ConfigReader) {
 		panic(err)
 	}
 	config.youtube.oauthport = oauthport
+
+	maxresults, err := strconv.Atoi(t.Youtube["maxresults"])
+	if err != nil {
+		fmt.Printf("Reading the youtube max results was a problem\n")
+		panic(err)
+	}
+	config.youtube.maxresults = int64(maxresults)
 }
 
 func (config *Config) GetYoutubeClientId() string {
@@ -31,4 +38,8 @@ func (config *Config) GetYoutubeRefreshToken() string {
 
 func (config *Config) GetYoutubeOAuthPort() int {
 	return config.youtube.oauthport
+}
+
+func (config *Config) GetYoutubeMaxResultCount() int64 {
+	return config.youtube.maxresults
 }

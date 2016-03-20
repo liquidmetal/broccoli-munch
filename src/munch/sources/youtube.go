@@ -53,11 +53,12 @@ func (src *SourceYoutube) fetchRecentUploads() ([]*youtube.PlaylistItem, error) 
 	client := newOAuthClient(ctx, oauthconfig, src.cfg)
 	service, err := youtube.New(client)
 	cs := youtube.NewChannelsService(service)
-	call_channel := cs.List("contentDetails").ForUsername(src.url)
+	call_channel := cs.List("contentDetails").MaxResults(1).Id(src.url)
 	resp_channel, err := call_channel.Do()
 
 	if err != nil {
 		// The token expired - delete it and try again
+		fmt.Printf("%s\n", err)
 		fmt.Printf("The token has probably expired. Trying to fetch a new token\n")
 
 		removeCacheFile(oauthconfig)
@@ -65,7 +66,7 @@ func (src *SourceYoutube) fetchRecentUploads() ([]*youtube.PlaylistItem, error) 
 
 		service, err = youtube.New(client)
 		cs := youtube.NewChannelsService(service)
-		call_channel := cs.List("contentDetails").MaxResults(50).ForUsername(src.url)
+		call_channel := cs.List("contentDetails").MaxResults(1).Id(src.url)
 		resp_channel, err = call_channel.Do()
 	}
 
@@ -74,10 +75,15 @@ func (src *SourceYoutube) fetchRecentUploads() ([]*youtube.PlaylistItem, error) 
 		return nil, errors.New("There was an error connecting to Youtube")
 	}
 
+	if len(resp_channel.Items) == 0 {
+		fmt.Printf("The REST call was successful there was an error fetching the channel ID: %s\n", src.url)
+		return nil, errors.New("There was an error connecting to Youtube")
+	}
+
 	uploads_playlist := resp_channel.Items[0].ContentDetails.RelatedPlaylists.Uploads
 
 	pl := youtube.NewPlaylistItemsService(service)
-	call_playlist := pl.List("snippet").MaxResults(50).PlaylistId(uploads_playlist)
+	call_playlist := pl.List("snippet").MaxResults(src.cfg.GetYoutubeMaxResultCount()).PlaylistId(uploads_playlist)
 	resp_playlist, err := call_playlist.Do()
 
 	return resp_playlist.Items, nil
@@ -89,7 +95,7 @@ func (src *SourceYoutube) FetchNewData() []tempArticle {
 		return nil
 	}
 
-	//fmt.Printf("yoyo = %s\n", resp_playlist.Items[0].ContentDetails.VideoId)
+	var latestCrawl int64 = src.lastCrawled
 	var ret []tempArticle
 	for _, plitem := range items {
 		t := new(tempArticle)
@@ -109,9 +115,15 @@ func (src *SourceYoutube) FetchNewData() []tempArticle {
 
 		if pd > src.lastCrawled {
 			ret = append(ret, *t)
+			if pd > latestCrawl {
+				latestCrawl = pd
+			}
 		}
 	}
 
+	src.lastCrawled = latestCrawl
+
+	fmt.Printf("Returning %d item\n", len(ret))
 	return ret
 }
 
@@ -151,13 +163,12 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 func newOAuthClient(ctx context.Context, config *oauth2.Config, cfg *config.Config) *http.Client {
 	cacheFile := tokenCacheFile(config)
 	token, err := tokenFromFile(cacheFile)
-	fmt.Printf("Error while fetching token = %s\n", err)
 	if err != nil {
 		token = tokenFromWeb(ctx, config, cfg)
 		token.RefreshToken = cfg.GetYoutubeRefreshToken()
 		saveToken(cacheFile, token)
 	} else {
-		fmt.Printf("Using cached token %#v from %q\n", token, cacheFile)
+		fmt.Printf("Using cached token from %q\n", cacheFile)
 	}
 
 	return config.Client(ctx, token)
