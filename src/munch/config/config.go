@@ -8,16 +8,23 @@ import (
 )
 
 type ConfigReader struct {
-	Mail   map[string]string
-	Db     map[string]string
-	Webapp map[string]string
-	Queues map[string]string
+	Mail    map[string]string
+	Youtube map[string]string
+	Db      map[string]string
+	Webapp  map[string]string
+	Queues  map[string]string
 }
 
 type Config struct {
 	mail struct {
 		publickey  string
 		privatekey string
+	}
+
+	youtube struct {
+		clientid     string
+		clientsecret string
+		refresh      string
 	}
 
 	db struct {
@@ -69,6 +76,7 @@ func (config *Config) readConfig() error {
 
 func (config *Config) parseConfigValues(t *ConfigReader) error {
 	config.parseConfigMailValues(t)
+	config.parseConfigYoutubeValues(t)
 
 	// Database settings
 	config.db.filename = t.Db["filename"]

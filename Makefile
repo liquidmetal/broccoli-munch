@@ -20,6 +20,10 @@ fetch:
 	go get github.com/dchest/htmlmin 
 	go get github.com/mailgun/mailgun-go
 	go get github.com/go-yaml/yaml
+	go get golang.org/x/oauth2/google
+	go get golang.org/x/oauth2
+	go get google.golang.org/api/youtube/v3
+	go get google.golang.org/api/googleapi
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .

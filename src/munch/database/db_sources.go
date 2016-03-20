@@ -58,8 +58,10 @@ func (db *Db) FetchSource(id int) (src sources.SourceManipulator) {
 
 	if source_type == sources.TypeRss {
 		return sources.NewSourceRss(id, name, url, last_crawled)
+	} else if source_type == sources.TypeYoutube {
+		return sources.NewSourceYoutube(id, name, url, last_crawled, db.cfg)
 	} else {
-		fmt.Printf("Unable to match source type")
+		fmt.Printf("Unable to match source type\n")
 	}
 
 	return nil

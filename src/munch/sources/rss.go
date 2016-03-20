@@ -9,16 +9,6 @@ import (
 	"net/http"
 )
 
-type tempArticle struct {
-	url         string
-	content     string
-	description string
-	title       string
-	keywords    string
-	image       string
-	pubdate     int64
-}
-
 func NewSourceRss(id int, name string, url string, lastcrawled int64) *SourceRss {
 	ret := new(SourceRss)
 	ret.id = id
@@ -160,11 +150,11 @@ func (rss *SourceRss) GenerateStories(articles []tempArticle) []stories.Story {
 	return stories
 }
 
-func (rss *SourceRss) GetId() int {
+func (rss *Source) GetId() int {
 	return rss.id
 }
 
-func (rss *SourceRss) GetName() string {
+func (rss *Source) GetName() string {
 	return rss.name
 }
 
@@ -176,6 +166,6 @@ func (rss *SourceRss) GetType() int {
 	return TypeRss
 }
 
-func (rss *SourceRss) GetLastCrawled() int64 {
+func (rss *Source) GetLastCrawled() int64 {
 	return rss.lastCrawled
 }

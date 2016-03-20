@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	TypeRss    = iota
-	TypeBlog   = iota
-	TypeVideo  = iota
-	TypeGithub = iota
+	TypeRss     = iota
+	TypeBlog    = iota
+	TypeYoutube = iota
+	TypeGithub  = iota
 )
 
 type SourceManipulator interface {
@@ -35,6 +35,16 @@ type SourceRss struct {
 	Source
 	url  string
 	data Rss2
+}
+
+type tempArticle struct {
+	url         string
+	content     string
+	description string
+	title       string
+	keywords    string
+	image       string
+	pubdate     int64
 }
 
 // Utility function for parsing any kind of time
@@ -63,6 +73,12 @@ func parse_time(mtime string) (int64, error) {
 		fmt.Printf("Parsed into: %d\n", temp.Unix())
 		return temp.Unix(), nil
 	}
+
+    temp, err = time.Parse("2006-01-02T15:04:05.000Z", mtime)
+    if err == nil {
+        fmt.Printf("Parsed into: %d\n", temp.Unix())
+        return temp.Unix(), nil
+    }
 
 	fmt.Printf("There was an error parsing: %s\n", mtime)
 	return -1, errors.New("There was an error parsing the timestamp")

@@ -61,3 +61,8 @@ func (db *Db) FetchStoriesSince(timestamp int64) []*stories.Story {
 	}
 	return ret
 }
+
+func (db *Db) GetStoryType(story *stories.Story) int {
+	source := db.FetchSource(story.GetSourceId())
+	return source.GetType()
+}
