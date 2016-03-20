@@ -28,6 +28,7 @@ type Config struct {
 		clientid     string
 		clientsecret string
 		refresh      string
+		oauthport    int
 	}
 
 	db struct {

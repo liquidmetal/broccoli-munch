@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS `broccoli_sources` (
 INSERT INTO broccoli_sources(name, url, type, lastcrawled)
     VALUES ("Techcrunch", "http://feeds.feedburner.com/TechCrunch/?fmt=xml", 0, -1),
            ("VentureBeat", "http://feeds.venturebeat.com/VentureBeat", 0, -1),
-           ("MKBHD", "http://youtube.com/user/marquesbrownlee/", 2, -1);
+           ("MKBHD", "marquesbrownlee", 2, -1),
+           ("SciShow", "scishow", 2, -1);
 
 DROP TABLE IF EXISTS `broccoli_stories`;
 CREATE TABLE IF NOT EXISTS `broccoli_stories` (

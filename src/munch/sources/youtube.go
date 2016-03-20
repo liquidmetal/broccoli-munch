@@ -32,7 +32,7 @@ func NewSourceYoutube(id int, name string, url string, lastcrawled int64, cfg *c
 	ret := new(SourceYoutube)
 	ret.id = id
 	ret.name = name
-	ret.url = FixRssUrl(url)
+	ret.url = url
 	ret.lastCrawled = lastcrawled
 	ret.cfg = cfg
 
@@ -53,7 +53,7 @@ func (src *SourceYoutube) fetchRecentUploads() ([]*youtube.PlaylistItem, error) 
 	client := newOAuthClient(ctx, oauthconfig, src.cfg)
 	service, err := youtube.New(client)
 	cs := youtube.NewChannelsService(service)
-	call_channel := cs.List("contentDetails").ForUsername("marquesbrownlee")
+	call_channel := cs.List("contentDetails").ForUsername(src.url)
 	resp_channel, err := call_channel.Do()
 
 	if err != nil {
@@ -65,7 +65,7 @@ func (src *SourceYoutube) fetchRecentUploads() ([]*youtube.PlaylistItem, error) 
 
 		service, err = youtube.New(client)
 		cs := youtube.NewChannelsService(service)
-		call_channel := cs.List("contentDetails").MaxResults(50).ForUsername("marquesbrownlee")
+		call_channel := cs.List("contentDetails").MaxResults(50).ForUsername(src.url)
 		resp_channel, err = call_channel.Do()
 	}
 
