@@ -41,10 +41,12 @@ type Config struct {
 	}
 
 	queues struct {
-		host     string
-		port     int
-		username string
-		password string
+		host        string
+		port        int
+		username    string
+		password    string
+		exchange    string
+		queue_crawl string
 	}
 }
 
