@@ -18,6 +18,7 @@ func (config *Config) parseConfigQueueValues(t *ConfigReader) error {
 	config.queues.username = t.Queues["username"]
 	config.queues.password = t.Queues["password"]
 	config.queues.queue_crawl = t.Queues["queue_crawl"]
+	config.queues.queue_email = t.Queues["queue_email"]
 	config.queues.exchange = t.Queues["exchange"]
 	return nil
 }
@@ -40,6 +41,10 @@ func (config *Config) GetQueuePassword() string {
 
 func (config *Config) GetQueueCrawl() string {
 	return config.queues.queue_crawl
+}
+
+func (config *Config) GetQueueEmail() string {
+	return config.queues.queue_email
 }
 
 func (config *Config) GetQueueExchange() string {

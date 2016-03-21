@@ -47,6 +47,7 @@ type Config struct {
 		password    string
 		exchange    string
 		queue_crawl string
+		queue_email string
 	}
 }
 

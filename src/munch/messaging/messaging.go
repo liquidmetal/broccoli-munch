@@ -12,6 +12,7 @@ type Broker struct {
 	channel     *amqp.Channel    // Channel to send commands
 	cfg         *config.Config   // Keep a link to the config file (for queue names)
 	queue_crawl *amqp.Queue
+	queue_email *amqp.Queue
 }
 
 func New(config *config.Config) *Broker {
@@ -58,25 +59,34 @@ func (broker *Broker) initializeQueues() error {
 		return fmt.Errorf("There was an error declaring the exchange")
 	}
 
-	fmt.Printf("Declaring queue with name: %s\n", broker.cfg.GetQueueCrawl())
-	queue_crawl, err := broker.channel.QueueDeclare(broker.cfg.GetQueueCrawl(),
+	queue_crawl, _ := broker.queueDeclare(broker.cfg.GetQueueCrawl())
+	broker.queue_crawl = queue_crawl
+
+	queue_email, _ := broker.queueDeclare(broker.cfg.GetQueueEmail())
+	broker.queue_email = queue_email
+	return nil
+}
+
+func (broker *Broker) queueDeclare(name string) (*amqp.Queue, error) {
+	fmt.Printf("Declaring queue with name: %s\n", name)
+	queue, err := broker.channel.QueueDeclare(name,
 		true,
 		false,
 		false,
 		false,
 		nil)
 	if err != nil {
-		fmt.Printf("There was an error declaring the crawling queue")
-		return fmt.Errorf("There was an error when declaring the crawling queue")
+		fmt.Printf("There was an error declaring the queue: %s\n", name)
+		return nil, fmt.Errorf("There was an error when declaring the queue: %s\n", name)
 	}
-	broker.queue_crawl = &queue_crawl
 
-	err = broker.channel.QueueBind(queue_crawl.Name, broker.cfg.GetQueueCrawl(), broker.cfg.GetQueueExchange(), false, nil)
+	err = broker.channel.QueueBind(queue.Name, name, broker.cfg.GetQueueExchange(), false, nil)
 	if err != nil {
 		fmt.Printf("%s\n", err)
-		return fmt.Errorf("There was an error binding the queue")
+		return nil, fmt.Errorf("There was an error binding the queue")
 	}
-	return nil
+
+	return &queue, err
 }
 
 func (broker *Broker) EnqueueCrawl(sourceid int) error {
@@ -103,7 +113,7 @@ func (broker *Broker) EnqueueCrawl(sourceid int) error {
 }
 
 func (broker *Broker) DequeueCrawl() int {
-	deliveries, err := broker.channel.Consume(broker.queue_crawl.Name, "", false, false, false, false, nil)
+	deliveries, err := broker.channel.Consume(broker.queue_crawl.Name, "crawler", false, false, false, false, nil)
 
 	if err != nil {
 		return -1
@@ -111,6 +121,7 @@ func (broker *Broker) DequeueCrawl() int {
 
 	// Block until we hear something
 	payload := <-deliveries
+	broker.channel.Cancel("crawler", false)
 
 	payload.Ack(false)
 	sid, err := strconv.Atoi(string(payload.Body))
