@@ -12,8 +12,6 @@ import (
 )
 
 func main() {
-	//mq := connect()
-	//declareQueues(mq)
 
 	cfg := config.New()
 	db := database.New(cfg)
@@ -58,7 +56,15 @@ func handleCrawls(cfg *config.Config, db *database.Db, broker *messaging.Broker,
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Printf("Crawl stuff\n")
+			fmt.Printf("Enqueueing crawl requests ..\n")
+			ids, err := db.FetchAllSourceIds()
+			if err != nil {
+				continue
+			}
+			for _, id := range ids {
+				broker.EnqueueCrawl(int(id))
+			}
+			fmt.Printf("Enqueueing crawl requests [done]\n")
 
 		case <-quit:
 			fmt.Printf("Shutting down crawling loop\n")

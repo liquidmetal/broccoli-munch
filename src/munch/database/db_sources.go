@@ -66,3 +66,20 @@ func (db *Db) FetchSource(id int) (src sources.SourceManipulator) {
 
 	return nil
 }
+
+func (db *Db) FetchAllSourceIds() ([]int64, error) {
+	output, err := db.connection.Query("SELECT id FROM broccoli_sources")
+	if err != nil {
+		fmt.Printf("There was an error fetching a list of all sources\n%s\n", err)
+		return nil, fmt.Errorf("There was an error")
+	}
+
+	var id int64
+	var ret []int64
+	for output.Next() {
+		output.Scan(&id)
+		ret = append(ret, id)
+	}
+
+	return ret, nil
+}
