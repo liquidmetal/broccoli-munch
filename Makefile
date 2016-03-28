@@ -27,6 +27,7 @@ fetch:
 	go get golang.org/x/oauth2
 	go get google.golang.org/api/youtube/v3
 	go get google.golang.org/api/googleapi
+	go get github.com/ChimeraCoder/anaconda
 
 build:
 	docker build -f Dockerfile.crawler -t munch-crawler .

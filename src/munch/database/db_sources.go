@@ -60,6 +60,8 @@ func (db *Db) FetchSource(id int) (src sources.SourceManipulator) {
 		return sources.NewSourceRss(id, name, url, last_crawled)
 	} else if source_type == sources.TypeYoutube {
 		return sources.NewSourceYoutube(id, name, url, last_crawled, db.cfg)
+	} else if source_type == sources.TypeTwitter {
+		return sources.NewSourceTwitter(id, name, url, last_crawled, db.cfg)
 	} else {
 		fmt.Printf("Unable to match source type\n")
 	}

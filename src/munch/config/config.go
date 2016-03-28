@@ -13,6 +13,7 @@ type ConfigReader struct {
 	Db      map[string]string
 	Webapp  map[string]string
 	Queues  map[string]string
+	Twitter map[string]string
 }
 
 // Step 1: To add a new setting, add an entry here
@@ -30,6 +31,14 @@ type Config struct {
 		refresh      string
 		oauthport    int
 		maxresults   int64
+	}
+
+	twitter struct {
+		consumerkey    string
+		consumersecret string
+		accesstoken    string
+		accesssecret   string
+		maxresults     int64
 	}
 
 	db struct {
@@ -85,6 +94,7 @@ func (config *Config) readConfig() error {
 func (config *Config) parseConfigValues(t *ConfigReader) error {
 	config.parseConfigMailValues(t)
 	config.parseConfigYoutubeValues(t)
+	config.parseConfigTwitterValues(t)
 
 	// Database settings
 	config.db.filename = t.Db["filename"]

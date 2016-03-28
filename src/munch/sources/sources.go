@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	TypeRss     = iota
-	TypeBlog    = iota
-	TypeYoutube = iota
-	TypeGithub  = iota
+	TypeRss = iota
+	TypeBlog
+	TypeYoutube
+	TypeGithub
+	TypeTwitter
 )
 
 type SourceManipulator interface {
